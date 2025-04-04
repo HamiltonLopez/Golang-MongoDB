@@ -1,0 +1,9 @@
+.git/
+*.log
+*.env
+*.md
+__pycache__/
+node_modules/
+vendor/
+*.exe
+*.out
