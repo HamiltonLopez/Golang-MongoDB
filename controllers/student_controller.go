@@ -3,7 +3,6 @@ package controllers
 import (
     "encoding/json"
     "net/http"
-
     "github.com/gorilla/mux"
     "example.com/go-mongo-app/models"
     "example.com/go-mongo-app/services"

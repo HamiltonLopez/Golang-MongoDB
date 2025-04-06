@@ -8,6 +8,8 @@ import (
     "go.mongodb.org/mongo-driver/bson/primitive"
     "example.com/go-mongo-app/models"
     "log"
+    "os"  
+
 )
 
 type StudentRepository struct {
@@ -15,7 +17,12 @@ type StudentRepository struct {
 }
 
 func NewStudentRepository() *StudentRepository {
-    clientOptions := options.Client().ApplyURI("mongodb://mongodb:27017")
+    mongoURI := os.Getenv("MONGO_URI")
+    if mongoURI == "" {
+        log.Fatal("MONGO_URI not set in environment")
+    }
+
+    clientOptions := options.Client().ApplyURI(mongoURI)
     client, err := mongo.Connect(context.TODO(), clientOptions)
     if err != nil {
         log.Fatal(err)
@@ -24,6 +31,7 @@ func NewStudentRepository() *StudentRepository {
     collection := client.Database("school").Collection("students")
     return &StudentRepository{collection}
 }
+
 
 func (repo *StudentRepository) GetAllStudents() ([]models.Student, error) {
     var students []models.Student
