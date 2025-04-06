@@ -52,3 +52,46 @@ func (repo *StudentRepository) CreateStudent(student models.Student) (*models.St
     }
     return &student, nil
 }
+
+func (repo *StudentRepository) GetStudentByID(id string) (*models.Student, error) {
+    objectID, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        return nil, err
+    }
+
+    var student models.Student
+    filter := bson.M{"_id": objectID}
+    err = repo.collection.FindOne(context.TODO(), filter).Decode(&student)
+    if err != nil {
+        return nil, err
+    }
+
+    return &student, nil
+}
+
+func (repo *StudentRepository) UpdateStudent(student models.Student) (*models.Student, error) {
+    filter := bson.M{"_id": student.ID}
+    update := bson.M{"$set": student}
+
+    _, err := repo.collection.UpdateOne(context.TODO(), filter, update)
+    if err != nil {
+        return nil, err
+    }
+
+    return &student, nil
+}
+
+// repositories/student_repository.go
+func (r *StudentRepository) RemoveStudentByID(id string) (bool, error) {
+    objID, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        return false, err
+    }
+
+    result, err := r.collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+    if err != nil {
+        return false, err
+    }
+
+    return result.DeletedCount > 0, nil
+}
