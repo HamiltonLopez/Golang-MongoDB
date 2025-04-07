@@ -1,0 +1,27 @@
+mode: set
+example.com/go-mongo-app/controllers/student_controller.go:15.88,19.2 1 1
+example.com/go-mongo-app/controllers/student_controller.go:21.81,23.19 2 1
+example.com/go-mongo-app/controllers/student_controller.go:28.5,32.7 2 1
+example.com/go-mongo-app/controllers/student_controller.go:23.19,26.6 2 0
+example.com/go-mongo-app/controllers/student_controller.go:35.83,38.19 3 1
+example.com/go-mongo-app/controllers/student_controller.go:43.5,44.19 2 1
+example.com/go-mongo-app/controllers/student_controller.go:49.5,51.42 3 1
+example.com/go-mongo-app/controllers/student_controller.go:38.19,41.6 2 1
+example.com/go-mongo-app/controllers/student_controller.go:44.19,47.6 2 0
+example.com/go-mongo-app/controllers/student_controller.go:55.84,58.17 3 1
+example.com/go-mongo-app/controllers/student_controller.go:63.5,64.19 2 1
+example.com/go-mongo-app/controllers/student_controller.go:69.5,73.7 2 1
+example.com/go-mongo-app/controllers/student_controller.go:58.17,61.6 2 1
+example.com/go-mongo-app/controllers/student_controller.go:64.19,67.6 2 1
+example.com/go-mongo-app/controllers/student_controller.go:75.83,81.19 5 1
+example.com/go-mongo-app/controllers/student_controller.go:87.5,88.19 2 1
+example.com/go-mongo-app/controllers/student_controller.go:93.5,94.19 2 1
+example.com/go-mongo-app/controllers/student_controller.go:99.5,104.7 3 1
+example.com/go-mongo-app/controllers/student_controller.go:81.19,84.6 2 1
+example.com/go-mongo-app/controllers/student_controller.go:88.19,91.6 2 1
+example.com/go-mongo-app/controllers/student_controller.go:94.19,97.6 2 0
+example.com/go-mongo-app/controllers/student_controller.go:108.83,111.17 3 1
+example.com/go-mongo-app/controllers/student_controller.go:116.5,117.19 2 1
+example.com/go-mongo-app/controllers/student_controller.go:122.5,122.40 1 1
+example.com/go-mongo-app/controllers/student_controller.go:111.17,114.6 2 0
+example.com/go-mongo-app/controllers/student_controller.go:117.19,120.6 2 1

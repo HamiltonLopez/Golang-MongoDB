@@ -5,6 +5,15 @@ import (
     "example.com/go-mongo-app/models"
     "example.com/go-mongo-app/repositories"
 )
+type StudentServiceInterface interface {
+	GetStudents() ([]models.Student, error)
+	GetStudentByID(id string) (*models.Student, error)
+	AddStudent(student models.Student) (*models.Student, error)
+	UpdateStudent(student *models.Student) (*models.Student, error)
+	DeleteStudentByID(id string) error
+}
+
+
 
 type StudentService struct {
     repo *repositories.StudentRepository
@@ -39,6 +48,6 @@ func (s *StudentService) DeleteStudentByID(id string) error {
 }
 
 
-func (s *StudentService) UpdateStudent(student models.Student) (*models.Student, error) {
+func (s *StudentService) UpdateStudent(student *models.Student) (*models.Student, error) {
     return s.repo.UpdateStudent(student)
 }

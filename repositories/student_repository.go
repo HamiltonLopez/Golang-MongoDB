@@ -77,7 +77,7 @@ func (repo *StudentRepository) GetStudentByID(id string) (*models.Student, error
     return &student, nil
 }
 
-func (repo *StudentRepository) UpdateStudent(student models.Student) (*models.Student, error) {
+func (repo *StudentRepository) UpdateStudent(student *models.Student) (*models.Student, error) {
     filter := bson.M{"_id": student.ID}
     update := bson.M{"$set": student}
 
@@ -86,7 +86,7 @@ func (repo *StudentRepository) UpdateStudent(student models.Student) (*models.St
         return nil, err
     }
 
-    return &student, nil
+    return student, nil
 }
 
 // repositories/student_repository.go

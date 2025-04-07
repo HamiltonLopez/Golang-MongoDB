@@ -6,18 +6,20 @@ import (
     "github.com/gorilla/mux"
     "example.com/go-mongo-app/models"
     "example.com/go-mongo-app/services"
+    "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type StudentController struct {
-    service *services.StudentService
+    Service services.StudentServiceInterface
 }
-
-func NewStudentController(service *services.StudentService) *StudentController {
-    return &StudentController{service}
+func NewStudentController(service services.StudentServiceInterface) *StudentController {
+    return &StudentController{
+        Service: service,
+    }
 }
 
 func (c *StudentController) GetStudents(w http.ResponseWriter, r *http.Request) {
-    students, err := c.service.GetStudents()
+    students, err := c.Service.GetStudents()
     if err != nil {
         http.Error(w, "Error al obtener estudiantes", http.StatusInternalServerError)
         return
@@ -38,17 +40,16 @@ func (c *StudentController) CreateStudent(w http.ResponseWriter, r *http.Request
         return
     }
 
-    newStudent, err := c.service.AddStudent(student)
+    newStudent, err := c.Service.AddStudent(student)
     if err != nil {
         http.Error(w, "Error al insertar estudiante", http.StatusInternalServerError)
         return
     }
 
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]interface{}{
-        "message": "Estudiante creado correctamente",
-        "student": newStudent,
-    })
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(newStudent)
+    
 }
 
 func (c *StudentController) GetStudentByID(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +60,7 @@ func (c *StudentController) GetStudentByID(w http.ResponseWriter, r *http.Reques
         return
     }
 
-    student, err := c.service.GetStudentByID(id)
+    student, err := c.Service.GetStudentByID(id)
     if err != nil {
         http.Error(w, "Estudiante no encontrado", http.StatusNotFound)
         return
@@ -71,8 +72,10 @@ func (c *StudentController) GetStudentByID(w http.ResponseWriter, r *http.Reques
         "student": student,
     })
 }
-
 func (c *StudentController) UpdateStudent(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r) // 👈 extraemos el id desde la URL
+    id := vars["id"]
+
     var student models.Student
     err := json.NewDecoder(r.Body).Decode(&student)
     if err != nil {
@@ -80,18 +83,27 @@ func (c *StudentController) UpdateStudent(w http.ResponseWriter, r *http.Request
         return
     }
 
-    updatedStudent, err := c.service.UpdateStudent(student)
+    // Convertimos el ID a ObjectID y lo asignamos al struct
+    student.ID, err = primitive.ObjectIDFromHex(id)
+    if err != nil {
+        http.Error(w, "ID inválido", http.StatusBadRequest)
+        return
+    }
+
+    updatedStudent, err := c.Service.UpdateStudent(&student)
     if err != nil {
         http.Error(w, "Error al actualizar estudiante", http.StatusInternalServerError)
         return
     }
 
     w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(map[string]interface{}{
         "message": "Estudiante actualizado correctamente",
         "student": updatedStudent,
     })
 }
+
 
 func (c *StudentController) DeleteStudent(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -101,14 +113,12 @@ func (c *StudentController) DeleteStudent(w http.ResponseWriter, r *http.Request
         return
     }
 
-    err := c.service.DeleteStudentByID(id)
+    err := c.Service.DeleteStudentByID(id)
     if err != nil {
         http.Error(w, "Error al eliminar estudiante", http.StatusInternalServerError)
         return
     }
 
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]string{
-        "message": "Estudiante eliminado correctamente",
-    })
+    w.WriteHeader(http.StatusNoContent)
 }
+
