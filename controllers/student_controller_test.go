@@ -6,6 +6,7 @@ import (
     "net/http"
     "net/http/httptest"
     "testing"
+    "fmt"
 
     "github.com/gorilla/mux"
     "github.com/stretchr/testify/assert"
@@ -164,4 +165,101 @@ func TestUpdateStudent_Success(t *testing.T) {
 
     assert.Equal(t, http.StatusOK, resp.Code)
     mockService.AssertExpectations(t)
+}
+func TestCreateStudent_InvalidData(t *testing.T) {
+    mockService := new(MockStudentService)
+    controller := NewStudentController(mockService)
+
+    req := httptest.NewRequest("POST", "/students", bytes.NewReader([]byte("invalid json")))
+    req.Header.Set("Content-Type", "application/json")
+    resp := httptest.NewRecorder()
+
+    controller.CreateStudent(resp, req)
+
+    assert.Equal(t, http.StatusBadRequest, resp.Code)
+}
+
+
+
+func TestUpdateStudent_InvalidID(t *testing.T) {
+    mockService := new(MockStudentService)
+    controller := NewStudentController(mockService)
+
+    req := httptest.NewRequest("PUT", "/students/invalid-id", bytes.NewReader([]byte("{}")))
+    req.Header.Set("Content-Type", "application/json")
+    req = mux.SetURLVars(req, map[string]string{"id": "invalid-id"})
+    resp := httptest.NewRecorder()
+
+    controller.UpdateStudent(resp, req)
+
+    assert.Equal(t, http.StatusBadRequest, resp.Code)
+}
+
+func TestUpdateStudent_InvalidData(t *testing.T) {
+    mockService := new(MockStudentService)
+    controller := NewStudentController(mockService)
+
+    id := primitive.NewObjectID().Hex()
+
+    req := httptest.NewRequest("PUT", "/students/"+id, bytes.NewReader([]byte("invalid json")))
+    req.Header.Set("Content-Type", "application/json")
+    req = mux.SetURLVars(req, map[string]string{"id": id})
+    resp := httptest.NewRecorder()
+
+    controller.UpdateStudent(resp, req)
+
+    assert.Equal(t, http.StatusBadRequest, resp.Code)
+}
+
+
+
+func TestDeleteStudent_Error(t *testing.T) {
+    mockService := new(MockStudentService)
+    controller := NewStudentController(mockService)
+
+    id := primitive.NewObjectID().Hex()
+
+    mockService.On("DeleteStudentByID", id).Return(assert.AnError)
+
+    req := httptest.NewRequest("DELETE", "/students/"+id, nil)
+    req = mux.SetURLVars(req, map[string]string{"id": id})
+    resp := httptest.NewRecorder()
+
+    controller.DeleteStudent(resp, req)
+
+    assert.Equal(t, http.StatusInternalServerError, resp.Code)
+    mockService.AssertExpectations(t)
+}
+
+
+func TestGetStudentByID_MissingID(t *testing.T) {
+    mockService := new(MockStudentService)
+    controller := NewStudentController(mockService)
+
+    req := httptest.NewRequest("GET", "/students/", nil)
+    req = mux.SetURLVars(req, map[string]string{"id": ""})
+    resp := httptest.NewRecorder()
+
+    controller.GetStudentByID(resp, req)
+
+    assert.Equal(t, http.StatusBadRequest, resp.Code)
+    assert.Contains(t, resp.Body.String(), "ID no proporcionado")
+}
+
+func TestGetStudentByID_NotFound(t *testing.T) {
+    mockService := new(MockStudentService)
+    controller := NewStudentController(mockService)
+
+    id := "507f191e810c19729de860ea"
+
+    mockService.On("GetStudentByID", id).Return((*models.Student)(nil), fmt.Errorf("no encontrado"))
+
+    req := httptest.NewRequest("GET", "/students/"+id, nil)
+    req = mux.SetURLVars(req, map[string]string{"id": id})
+    resp := httptest.NewRecorder()
+
+    controller.GetStudentByID(resp, req)
+
+    assert.Equal(t, http.StatusNotFound, resp.Code)
+    assert.Contains(t, resp.Body.String(), "Estudiante no encontrado")
 }
