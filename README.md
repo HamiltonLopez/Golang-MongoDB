@@ -1,38 +1,191 @@
-# Microservicio en Golang con MongoDB
+# 📚 Go Mongo App – Microservicio de Gestión de Estudiantes
 
-## Descripción
+Este proyecto es un microservicio RESTful desarrollado en Go, que gestiona operaciones CRUD sobre una colección de estudiantes en MongoDB. Está estructurado por capas (models, repositories, services, controllers) y se ha integrado con Docker para facilitar el despliegue.
 
-Este proyecto consiste en un microservicio desarrollado en Golang que implementa operaciones CRUD (Crear, Leer, Actualizar, Eliminar) para la entidad `estudiantes`. Utiliza MongoDB como base de datos, está contenerizado con Docker y orquestado mediante Docker Compose.
+---
 
-El objetivo principal es demostrar la implementación de un servicio RESTful siguiendo una arquitectura modular, junto con buenas prácticas de desarrollo, pruebas, contenerización y gestión de bases de datos.
+## 🧩 Estructura del Proyecto
 
-## Características Principales
+```
+go-mongo-app/
+├── controllers/
+├── models/
+├── repositories/
+├── services/
+├── Dockerfile
+├── docker-compose.yml
+├── main.go
+├── go.mod / go.sum
+└── README.md
+```
 
-* **API RESTful:** Endpoints para operaciones CRUD sobre la entidad `estudiantes`.
-* **Arquitectura Modular:** Separación de responsabilidades en Controladores, Servicios y Repositorios (DAO). [source: 4]
-* **Base de Datos:** MongoDB integrada usando el driver oficial `mongo-go-driver`. [source: 5]
-* **Contenerización:** Dockerfile optimizado con Multi-Stage Build. [source: 13, 14]
-* **Orquestación:** `docker-compose.yml` para gestionar el microservicio y la base de datos MongoDB. [source: 17]
-* **Persistencia de Datos:** Volumen Docker para la base de datos MongoDB, asegurando que los datos no se pierdan al detener/reiniciar contenedores. [source: 6]
-* **Pruebas:**
-    * Pruebas Unitarias (utilizando `Testify/GoMock`). [source: 9]
-    * Pruebas de Integración para validar el flujo CRUD completo. [source: 10]
-    * Reporte de Cobertura de Código. [source: 10]
+---
 
-## Tecnologías Utilizadas
+## 🚀 Tecnologías Utilizadas
 
-* **Lenguaje:** Golang (`1.20-alpine`)
-* **Base de Datos:** MongoDB
-* **Driver MongoDB:** `mongo-go-driver`
-* **Contenerización:** Docker
-* **Orquestación:** Docker Compose
-* **Testing:** `testing` (nativo de Go), `Testify/GoMock`
-* **API Client:** Postman
+- **Go 1.20+**
+- **MongoDB**
+- **Mux Router**
+- **Docker y Docker Compose**
+- **Testify para pruebas unitarias**
+- **Cobertura de pruebas con `go test -cover`**
 
-## Prerrequisitos
+---
 
-* Go (`Versión, ej: 1.18+`) instalado: [https://golang.org/dl/](https://golang.org/dl/)
-* Docker instalado: [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
-* Docker Compose instalado: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
-* Git: [https://git-scm.com/downloads](https://git-scm.com/downloads)
-* Postman (opcional, para probar API): [https://www.postman.com/downloads/](https://www.postman.com/downloads/)
+## 🔧 Requisitos Previos
+
+- [Go instalado](https://golang.org/dl/)
+- [Docker](https://docs.docker.com/get-docker/)
+- Cuenta en [Docker Hub](https://hub.docker.com)
+
+---
+
+## 🧪 Ejecutar la Aplicación Localmente
+
+### 1. Clonar el proyecto
+```bash
+git clone https://github.com/HamiltonLopez/Golang-MongoDB.git
+cd Golang-MongoDB
+```
+
+### 2. Levantar MongoDB con Docker (opcional si tienes uno local)
+```bash
+docker-compose up -d
+```
+
+Esto creará:
+- MongoDB corriendo en `localhost:27017`
+- Una red Docker para conexión entre contenedores.
+
+---
+
+## ▶️ Ejecutar el microservicio en local (sin Docker)
+
+```bash
+MONGO_URI="mongodb://localhost:27017" go run main.go
+```
+
+La API estará disponible en: `http://localhost:8080`
+
+---
+
+## 🧪 Probar la API con Postman
+
+### 🚨 Actualizar estudiante por ID (PUT)
+
+- **URL:** `http://localhost:8080/students/{id}`
+- **Método:** `PUT`
+- **Body (JSON):**
+```json
+{
+  "name": "Laura",
+  "age": 24,
+  "email": "laura@test.com"
+}
+```
+
+Otros endpoints disponibles:
+- `GET /students`
+- `GET /students/{id}`
+- `POST /students`
+- `DELETE /students/{id}`
+
+---
+
+## 🧪 Ejecutar pruebas y cobertura
+
+### Pruebas con cobertura general:
+
+```bash
+MONGO_URI="mongodb://localhost:27017" go test ./... -cover
+```
+
+### Ver cobertura en HTML:
+
+```bash
+go test ./controllers -coverprofile=coverage.out
+go tool cover -html=coverage.out
+```
+
+---
+
+
+## 🖥️ Desplegar con Docker Compose
+
+Este archivo levanta tanto el microservicio como MongoDB:
+
+```bash
+docker-compose up --build
+```
+
+El servicio estará disponible en:
+- API: `http://localhost:8080`
+- MongoDB: `localhost:27017`
+
+---
+
+## 🔒 Seguridad
+
+- MongoDB se levanta en red Docker aislada (`mongo_net`).
+- Se pueden agregar usuarios y contraseñas en el `docker-compose.yml` para más seguridad.
+- MongoDB no está expuesto fuera del contenedor (opcional: `ports`).
+
+---
+
+## 💾 Volúmenes
+
+MongoDB persiste datos en volumen `mongo_data`:
+
+```yaml
+volumes:
+  mongo_data:
+```
+
+Esto asegura que los datos no se pierdan al reiniciar el contenedor.
+
+---
+
+## 🛠️ Script Bash de Automatización
+
+Archivo `build_and_run.sh` (opcional):
+
+```bash
+#!/bin/bash
+
+docker build -t go-mongo-app .
+docker tag go-mongo-app hamiltonlg/hlopez:latest
+docker push hamiltonlg/hlopez:latest
+docker-compose up --build
+```
+
+---
+
+## 📈 Diagrama de Infraestructura
+
+![Infraestructura](infraestructura.png)
+
+Componentes:
+- Contenedor API Go
+- Contenedor MongoDB
+- Red Docker (`mongo_net`)
+- Volumen persistente (`mongo_data`)
+- MongoDB protegido dentro de la red interna
+
+---
+
+## 🧠 Autor
+
+**Hamilton López**  
+
+
+---
+
+## ✅ Estado del Proyecto
+
+- [x] CRUD completo
+- [x] Dockerfile y Docker Compose
+- [x] Pruebas unitarias con cobertura
+- [x] Imagen publicada en Docker Hub
+- [x] Documentación y automatización
+
+---
