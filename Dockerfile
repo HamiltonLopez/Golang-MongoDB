@@ -9,6 +9,8 @@ RUN go mod download
 
 COPY . .
 
+RUN ls -l
+RUN cat main.go || echo "main.go no encontrado"
 
 RUN go build -o main .
 
