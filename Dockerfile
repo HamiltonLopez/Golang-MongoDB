@@ -1,5 +1,5 @@
 # Etapa 1: build
-FROM golang:1.20-alpine AS builder
+FROM golang:1.22.7 AS builder
 
 WORKDIR /app
 
