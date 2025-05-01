@@ -26,5 +26,32 @@ services:
       - ./mongo_backups:/backup
     restart: unless-stopped
 
+  registry:
+    image: registry:2
+    container_name: my-registry
+    ports:
+      - "5000:5000"
+    restart: always
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '[http://localhost:8085]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[GET,PUT,POST,DELETE,OPTIONS]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
+    volumes:
+      - registry_data:/var/lib/registry
+
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: registry-ui
+    ports:
+      - "8085:80"   # Cambié 8080 → 8085 para evitar conflicto con tu app
+    environment:
+      - REGISTRY_TITLE=Mi Propio Docker Registry
+      - REGISTRY_URL=http://localhost:5000
+    depends_on:
+      - registry
+    restart: always
+
 volumes:
   mongo-data:
+  registry_data:

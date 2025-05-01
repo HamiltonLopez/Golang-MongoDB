@@ -28,7 +28,6 @@ EXPOSE 8080
 
 CMD ["./main"]
 
+# Etapa 2: run
 
-# Etapa 2: production
-# FROM alpine:latest
-# RUN apk --no-cache add ca-certificates
+
