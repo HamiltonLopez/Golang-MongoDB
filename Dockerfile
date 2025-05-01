@@ -9,10 +9,10 @@ RUN go mod download
 
 COPY . .
 
-RUN ls -l
-RUN cat main.go || echo "main.go no encontrado"
+RUN echo "Archivos en /app:" && ls -la /app
 
-RUN go build -o main .
+
+RUN go build -v -x -o main .
 
 
 FROM alpine:latest
