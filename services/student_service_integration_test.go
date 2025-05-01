@@ -8,7 +8,6 @@ import (
     "example.com/go-mongo-app/models"
     "example.com/go-mongo-app/repositories"
 
-
     "github.com/stretchr/testify/assert"
     "go.mongodb.org/mongo-driver/bson"
 )
