@@ -51,3 +51,4 @@ func (s *StudentService) DeleteStudentByID(id string) error {
 func (s *StudentService) UpdateStudent(student *models.Student) (*models.Student, error) {
     return s.repo.UpdateStudent(student)
 }
+

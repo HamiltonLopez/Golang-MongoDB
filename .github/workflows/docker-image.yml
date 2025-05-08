@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
+          go-version: '1.23'
 
       - name: Instalar dependencias
         run: go mod tidy
@@ -25,8 +25,8 @@ jobs:
       - name: Ejecutar pruebas unitarias
         run: |
           echo "Ejecutando pruebas unitarias..."
-          
-          go test ./... -v -run ^TestStudentController$ ./integration_tests/student_controller_test.go
+          MONGO_URI="mongodb://localhost:27017" go test -run ^Test -short ./controllers/
+
 
       - name: Construir imagen Docker
         run: docker build -t go-mongo-app .
@@ -43,7 +43,8 @@ jobs:
         run: |
           echo "Ejecutando pruebas de integración..."
           go test ./integration_tests -v
-
+           MONGO_URI="mongodb://localhost:27017" go test ./... -v
+          
       - name: Apagar contenedores
         if: always()
         run: docker compose down
