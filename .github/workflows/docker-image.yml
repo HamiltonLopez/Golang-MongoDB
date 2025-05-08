@@ -1,56 +1,49 @@
-name: Build, Test and Push Docker Image
+name: CI/CD
 
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-test-deploy:
-    runs-on: self-hosted
+  build-and-test:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Sync go.mod and go.sum
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Instalar dependencias
         run: go mod tidy
 
-      - name: Run unit tests
+      - name: Ejecutar pruebas unitarias
         run: |
           echo "Ejecutando pruebas unitarias..."
-          go test ./... -v -run ^TestStudentController$ ./controllers/student_controller_test.go
+          
+          go test ./... -v -run ^TestStudentController$ ./integration_tests/student_controller_test.go
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Construir imagen Docker
+        run: docker build -t go-mongo-app .
 
-      - name: Log in to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Levantar contenedores para pruebas de integración
+        run: docker compose up -d
 
-      - name: Build Docker image
+      - name: Esperar MongoDB
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/hlopez:latest .
+          echo "Esperando a que MongoDB esté disponible..."
+          sleep 10
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ secrets.DOCKER_USERNAME }}/hlopez:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Push image to Docker Hub
-        if: success()
+      - name: Ejecutar pruebas de integración
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/hlopez:latest
-
-      - name: Run integration tests with Docker Compose
-        run: |
-          echo "Levantando contenedores..."
-          docker compose up -d
-          sleep 10  # espera a que inicie todo correctamente
           echo "Ejecutando pruebas de integración..."
-          go test ./... -v -run ^TestStudentController$ ./controllers/student_controller_integration_test.go
-          docker compose down
+          go test ./integration_tests -v
+
+      - name: Apagar contenedores
+        if: always()
+        run: docker compose down
