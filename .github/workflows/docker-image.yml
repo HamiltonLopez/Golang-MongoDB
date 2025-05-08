@@ -9,45 +9,48 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Run unit tests
-      run: |
-        echo "Ejecutando pruebas unitarias..."
-        go test ./controllers ./services -v -cover
+      - name: Sync go.mod and go.sum
+        run: go mod tidy
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Run unit tests
+        run: |
+          echo "Ejecutando pruebas unitarias..."
+          go test ./controller ./service -v -cover
 
-    - name: Log in to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
-      run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/hlopez:latest .
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: '${{ secrets.DOCKER_USERNAME }}/hlopez:latest'
-        format: 'table'
-        exit-code: '1'
-        severity: 'CRITICAL,HIGH'
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/hlopez:latest .
 
-    - name: Push image to Docker Hub
-      if: success()
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/hlopez:latest
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/hlopez:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
 
-    - name: Run integration tests with Docker Compose
-      run: |
-        echo "Levantando contenedores..."
-        docker-compose up -d
-        sleep 10  # espera a que inicie todo correctamente
-        echo "Ejecutando pruebas de integración..."
-        go test ./integration -v || (docker-compose down && exit 1)
-        docker-compose down
+      - name: Push image to Docker Hub
+        if: success()
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/hlopez:latest
+
+      - name: Run integration tests with Docker Compose
+        run: |
+          echo "Levantando contenedores..."
+          docker compose up -d
+          sleep 10  # espera a que inicie todo correctamente
+          echo "Ejecutando pruebas de integración..."
+          go test ./integration -v || (docker compose down && exit 1)
+          docker compose down
