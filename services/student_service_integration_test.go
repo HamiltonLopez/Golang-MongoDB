@@ -6,7 +6,6 @@ import (
     "time"
 
     "example.com/go-mongo-app/models"
-	"example.com/go-mongo-app/database"
     "example.com/go-mongo-app/repositories"
 
     "github.com/stretchr/testify/assert"
