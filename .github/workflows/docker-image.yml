@@ -56,3 +56,33 @@ jobs:
       - name: Apagar contenedores
         if: always()
         run: docker compose down || true
+
+release:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          # Puedes ajustar esta lógica según lo que quieras
+          VERSION="v$(date +'%Y.%m.%d')-build$(git rev-list --count HEAD)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
