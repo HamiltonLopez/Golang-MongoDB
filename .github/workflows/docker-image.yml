@@ -57,7 +57,7 @@ jobs:
         if: always()
         run: docker compose down || true
 
-release:
+  release:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
