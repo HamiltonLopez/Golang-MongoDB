@@ -27,7 +27,6 @@ jobs:
     env:
       MONGO_URI: mongodb://localhost:27017
 
-      
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -35,12 +34,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23' # Usa la 1.20 por compatibilidad con tidy
+          go-version: '1.23'
 
       - name: Instalar dependencias
         run: go mod tidy
 
-      - name: Ejecutar pruebas unitarias (y de integración si están en el mismo módulo)
+      - name: Ejecutar pruebas unitarias
         run: |
           echo "Ejecutando pruebas..."
           go test -run ^Test -short ./controllers/
@@ -48,10 +47,10 @@ jobs:
       - name: Construir imagen Docker
         run: docker build -t go-mongo-app .
 
-      - name: Levantar contenedores para pruebas externas (opcional)
+      - name: Levantar contenedores para pruebas externas
         run: docker compose up -d || true
 
-      - name: Ejecutar pruebas de integración externas (si están separadas)
+      - name: Ejecutar pruebas de integración externas
         run: |
           echo "Ejecutando pruebas de integración externas..."
           go test ./... -v || true
@@ -75,24 +74,22 @@ jobs:
           git config user.email "github-actions@github.com"
 
       - name: Generate new release tag
-          id: tag
-          run: |
-            # Obtén el último tag
-            LAST_TAG=$(git describe --tags --abbrev=0)
-            echo "Último tag: $LAST_TAG"
-            
-            # Incrementa el número de versión (este es solo un ejemplo de incremento)
-            VERSION="v1.00.$((${LAST_TAG##*.} + 1))"
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
-            git tag $VERSION
-            git push origin $VERSION
+        id: tag
+        run: |
+          # Obtener el último tag (si existe)
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.00.0")
+          echo "Último tag: $LAST_TAG"
+          
+          # Incrementar el número de versión
+          VERSION="v1.00.$((${LAST_TAG##*.} + 1))"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-
-
+          # Crear y empujar el nuevo tag
+          git tag $VERSION
+          git push origin $VERSION
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
-        
         with:
           tag_name: ${{ env.VERSION }}
         env:
@@ -109,9 +106,6 @@ jobs:
         run: |
           docker build -t ghcr.io/hamiltonlopez/go-mongo-app:latest .
 
-
-
       - name: Push Docker image to GitHub Packages
         run: |
-          docker push ghcr.io/hamiltonlopez/go-mongo-app:latest 
-
+          docker push ghcr.io/hamiltonlopez/go-mongo-app:latest
