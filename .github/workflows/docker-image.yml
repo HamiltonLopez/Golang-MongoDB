@@ -74,14 +74,26 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Generate release tag
+      - name: Auto-incrementar versión tipo v1.00.X
         id: tag
         run: |
-          # Puedes ajustar esta lógica según lo que quieras
-          VERSION="v$(date +'%Y.%m.%d')-build$(git rev-list --count HEAD)"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          git tag $VERSION
-          git push origin $VERSION
+          # Obtener el último tag que coincida con el patrón v1.00.*
+          LAST_TAG=$(git tag --list "v1.00.*" --sort=-v:refname | head -n 1)
+
+          if [[ -z "$LAST_TAG" ]]; then
+            NEXT_TAG="v1.00.0"
+          else
+            LAST_NUM=$(echo "$LAST_TAG" | awk -F. '{print $NF}')
+            NEXT_NUM=$((LAST_NUM + 1))
+            NEXT_TAG="v1.00.$NEXT_NUM"
+          fi
+
+          echo "VERSION=$NEXT_TAG" >> $GITHUB_ENV
+
+          git tag $NEXT_TAG
+          git push origin $NEXT_TAG
+
+
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -106,5 +118,5 @@ jobs:
 
       - name: Push Docker image to GitHub Packages
         run: |
-          docker push ghcr.io/hamiltonlopez/go-mongo-app:latest .
+          docker push ghcr.io/hamiltonlopez/go-mongo-app:latest 
 
