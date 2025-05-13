@@ -74,24 +74,19 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Auto-incrementar versión tipo v1.00.X
-        id: tag
-        run: |
-          # Obtener el último tag que coincida con el patrón v1.00.*
-          LAST_TAG=$(git tag --list "v1.00.*" --sort=-v:refname | head -n 1)
+      - name: Generate new release tag
+          id: tag
+          run: |
+            # Obtén el último tag
+            LAST_TAG=$(git describe --tags --abbrev=0)
+            echo "Último tag: $LAST_TAG"
+            
+            # Incrementa el número de versión (este es solo un ejemplo de incremento)
+            VERSION="v1.00.$((${LAST_TAG##*.} + 1))"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            git tag $VERSION
+            git push origin $VERSION
 
-          if [[ -z "$LAST_TAG" ]]; then
-            NEXT_TAG="v1.00.0"
-          else
-            LAST_NUM=$(echo "$LAST_TAG" | awk -F. '{print $NF}')
-            NEXT_NUM=$((LAST_NUM + 1))
-            NEXT_TAG="v1.00.$NEXT_NUM"
-          fi
-
-          echo "VERSION=$NEXT_TAG" >> $GITHUB_ENV
-
-          git tag $NEXT_TAG
-          git push origin $NEXT_TAG
 
 
 
