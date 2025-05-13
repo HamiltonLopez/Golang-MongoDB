@@ -89,3 +89,21 @@ jobs:
           tag_name: ${{ env.VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image for GitHub Packages
+        run: |
+          docker build -t ghcr.io/hamiltonlopez/go-mongo-app:latest .
+
+
+
+      - name: Push Docker image to GitHub Packages
+        run: |
+          docker push ghcr.io/hamiltonlopez/go-mongo-app:latest .
+
