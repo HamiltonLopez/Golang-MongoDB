@@ -187,5 +187,46 @@ Componentes:
 - [x] Pruebas unitarias con cobertura
 - [x] Imagen publicada en Docker Hub
 - [x] Documentación y automatización
+- [x] Pipeline CI/CD con GitHub Actions
+- [x] Escaneo automático de vulnerabilidades
+- [x] Despliegue automático con runner self-hosted
+
+---
+
+## 🔄 CI/CD con GitHub Actions
+
+El proyecto cuenta con un robusto pipeline de CI/CD implementado con GitHub Actions que incluye:
+
+### 🛠️ Pipeline Principal (docker-image.yml)
+
+1. **Build y Escaneo de Seguridad**
+   - Construcción de imagen Docker
+   - Escaneo de vulnerabilidades con Trivy
+   - Push a Docker Hub si pasa el escaneo
+
+2. **Build y Pruebas**
+   - Levanta MongoDB en contenedor para pruebas
+   - Ejecuta pruebas unitarias
+   - Ejecuta pruebas de integración
+   - Construye y prueba con Docker Compose
+
+3. **Release Automático**
+   - Genera tags automáticos de versión
+   - Publica la imagen en GitHub Container Registry
+   - Crea releases en GitHub
+
+### 🚀 Despliegue Automático (deploy.yml)
+
+- Ejecuta en runner self-hosted
+- Actualiza automáticamente la aplicación en producción
+- Gestiona el ciclo de vida de los contenedores
+
+### 🔐 Secretos Necesarios
+
+Para que el pipeline funcione correctamente, se requieren los siguientes secretos en GitHub:
+
+- `DOCKER_USERNAME`: Usuario de Docker Hub
+- `DOCKER_PASSWORD`: Token de acceso de Docker Hub
+- `GHCR_TOKEN`: Token de acceso para GitHub Container Registry
 
 ---
